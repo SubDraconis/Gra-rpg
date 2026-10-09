@@ -75,6 +75,20 @@ def wyswietl_mape(mapa, x_gracza, y_gracza):
 
     print()
 
+
+def generuj_mape_10x10(x_gracza=0, y_gracza=0):
+    """Tworzy mapę 10x10 w zakresie x i y od -5 do 4.
+    Pozycja gracza jest wpisana jako "W".
+    """
+    mapa = {}
+    for y in range(-5, 5):
+        for x in range(-5, 5):
+            if x == x_gracza and y == y_gracza:
+                mapa[(x, y)] = "W"
+            else:
+                mapa[(x, y)] = tworzenie_pola(x, y, mapa)
+    return mapa
+
 def losuj_wydarzenie(pozycja_gracza: str, baza_wydarzen: List[Wydarzenie], gracz: Postac):
     dostepne = [w for w in baza_wydarzen if w.miejsce == pozycja_gracza]
     
@@ -97,18 +111,18 @@ def losuj_wydarzenie(pozycja_gracza: str, baza_wydarzen: List[Wydarzenie], gracz
         print(f"\n> {wybrana_opcja.wynik_tekst}")
         time.sleep(1)
 
-        # 1. Zmiana HP
+        
         if wybrana_opcja.zmiana_hp != 0:
             gracz.zmien_hp(wybrana_opcja.zmiana_hp)
 
-        # 2. Zmiana bazowych statystyk
+        
         if wybrana_opcja.zmiana_statow:
             for stat, wartosc in wybrana_opcja.zmiana_statow.items():
                 gracz.bazy_statystyki[stat] = gracz.bazy_statystyki.get(stat, 0) + wartosc
                 znak = "+" if wartosc > 0 else ""
                 print(f"✨ Twoja statystyka {stat} zmieniła się o: {znak}{wartosc}")
 
-        # 3. Przyznanie nowego przedmiotu
+        
         if wybrana_opcja.nowy_przedmiot:
             gracz.ekwipunek.append(wybrana_opcja.nowy_przedmiot)
             print(f"🎁 Zdobyłeś nowy przedmiot: {wybrana_opcja.nowy_przedmiot.nazwa} ({wybrana_opcja.nowy_przedmiot.typ})!")
@@ -292,3 +306,63 @@ def start() -> Postac:
 
     print(f"\nWitaj {gracz.imie} {gracz.nazwisko}! Twoja przygoda się rozpoczyna.\n")
     return gracz
+
+def interakcje_wm(x, y, mapa):
+    if isinstance(mapa, dict):
+        raise TypeError("mapa musi być funkcją, nie słownikiem współrzędnych")
+
+    if not callable(mapa):
+        raise TypeError("mapa musi być funkcją")
+
+    teren = mapa(x, y)
+
+    opcje_terenu = {
+        "W": {
+            1: "Odwiedź kowala",
+            2: "Zajrzyj do karczmy",
+            3: "Kup zapasy",
+            4: "Sprawdź rynek"
+        },
+        "L": {
+            1: "Zbierz drewno",
+            2: "Poluj na zwierzęta",
+            3: "Poszukaj schowanego skarbu",
+            4: "Odpocznij przy ognisku"
+        },
+        "R": {
+            1: "Udaj się nad rzekę",
+            2: "Poszukaj mostu",
+            3: "Złap ryby",
+            4: "Zbadaj brzeg"
+        },
+        "M": {
+            1: "Idź do gildii",
+            2: "Odwiedź sklep",
+            3: "Zajrzyj do tawerny",
+            4: "Sprawdź forum łowców"
+        },
+        "E": {
+            1: "Wejdź do lochów",
+            2: "Rozejrzyj się przy wejściu",
+            3: "Porozmawiaj z najemnikami",
+            4: "Przygotuj się do bitwy"
+        },
+        "J": {
+            1: "Zbadaj brzeg jeziora",
+            2: "Złap rybę",
+            3: "Poszukaj ukrytej łodzi",
+            4: "Usiądź i odpocznij"
+        },
+        ".": {
+            1: "Sprawdź okolicę",
+            2: "Poszukaj śladów",
+            3: "Odtwórz trasę"
+        }
+    }
+
+    print(f"Jesteś w miejscu: {teren}")
+    for numer, opis in opcje_terenu.get(teren, {}).items():
+        print(f"[{numer}] {opis}")
+
+    return None
+
